@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         string match_str = match.str(1);
         cout << match_str << '\n';
 
-        results << "match_str\n";
+        results << match_str << "\n";
 
     }
 
