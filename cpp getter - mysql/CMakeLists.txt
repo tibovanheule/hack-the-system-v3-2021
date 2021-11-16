@@ -5,6 +5,9 @@ add_executable(get main.cpp)
 
 TARGET_LINK_LIBRARIES( get PUBLIC -lboost_system -lpthread -lm -lcrypto -lcurl)
 
+TARGET_LINK_LIBRARIES(get PUBLIC mysqlclient -lmysqlcppconn)
+INCLUDE_DIRECTORIES(/usr/include/mysql/)
+LINK_DIRECTORIES(/usr/include/mysql/)
 
 #
 # OpenSSL
