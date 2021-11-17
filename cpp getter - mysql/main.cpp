@@ -51,7 +51,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
     }
 
-string get_agent(int index) {
+char * get_agent(int index) {
 
     return list_agent[index%4];
 }
