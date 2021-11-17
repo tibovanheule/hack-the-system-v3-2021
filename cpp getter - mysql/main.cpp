@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
+    //curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
     res = curl_easy_perform(curl);
     
     cout << "BUFFER" << res << endl;
@@ -93,6 +93,9 @@ int main(int argc, char *argv[])
     auto link_begin = sregex_iterator(readBuffer.begin(), readBuffer.end(), link_regex);
     auto link_end = sregex_iterator();
 
+                            long http_code = 0;
+                            curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
+                            cout << http_code << endl;
     cout << "I GOT HERE" << endl;
     sleep(5);
 	 try {
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
                             /* Connect to the MySQL test database */
                             con->setSchema(DB_SHEMA);
                             sql::PreparedStatement *stmt = con->prepareStatement(
-                                    "insert into hotel (name, rooms, lat, `long`, location) values (?, ?, ?, ?, 'Brussels');");
+                                    "insert ignore into hotel (name, rooms, lat, `long`, location) values (?, ?, ?, ?, 'Brussels');");
                             for (sregex_iterator i = link_begin; i != link_end; ++i) {
                                 smatch match = *i;
                                 // group 0, volledige match
@@ -111,13 +114,14 @@ int main(int argc, char *argv[])
                                 // ...
                                 string match_str = match.str(1);
                             string read;
+                            sleep(2);
                             cout << "THIS PAGE IS: "<< read << endl;
                             string url = "http://35.233.25.116";
                             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read);
                             url += match_str;
                             cout << url << endl;
                             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-                            curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
+                            //curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
                             cout << gen_random(12);
                             res = curl_easy_perform(curl);
                             cout << "RES IS: " << res << endl;
@@ -137,8 +141,11 @@ int main(int argc, char *argv[])
                             stmt->setString(1, hotelNaam.c_str());
                             std::regex roomRegex("([0-9]+) rooms", std::regex_constants::icase);
                             std::smatch rm;
-                            regex_search(read, rm , roomRegex);
-                            string roomAantal = rm[1];
+                            string roomAantal = "0";
+                            if (regex_search(read, rm , roomRegex)){
+                                roomAantal = rm[1];
+                            }
+                            
                             stmt->setString(2, roomAantal);
 
 
