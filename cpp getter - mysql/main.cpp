@@ -44,21 +44,18 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
     		return size * nmemb;
 }
 
-
-std::string gen_random(const int len) {
-    static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    std::string tmp_s;
-    tmp_s.reserve(len);
-
-    for (int i = 0; i < len; ++i) {
-        tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    const char * list_agent [] = {
+            "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/Zoiper Click2Dial62.0.3202.84 Mobile Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/Zoiper Click2Dial55.0.2883.91 Mobile Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
     }
-    
-    return tmp_s;
+
+string get_agent(int index) {
+
+    return list_agent[index%4];
 }
+
 
 
 
@@ -83,7 +80,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    //curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, get_agent(crawl));
     res = curl_easy_perform(curl);
     
     cout << "BUFFER" << res << endl;
