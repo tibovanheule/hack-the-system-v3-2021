@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     url += to_string(crawl);
     crawl++;
     cout << "URL: "<< url << endl;
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
     res = curl_easy_perform(curl);
