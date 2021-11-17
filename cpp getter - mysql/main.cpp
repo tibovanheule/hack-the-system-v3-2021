@@ -44,10 +44,10 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
     		return size * nmemb;
 }
 
-    const char * list_agent [] = {
-            "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/Zoiper Click2Dial62.0.3202.84 Mobile Safari/537.36",
-            "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36",
-            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/Zoiper Click2Dial55.0.2883.91 Mobile Safari/537.36",
+    char * list_agent [] = {
+            "Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.3202.84 Mobile Safari/605.36",
+            "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/95.0.3112.107 Mobile Safari/605.36",
+            "Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/95.0.2883.91 Mobile Safari/605.36",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
     };
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
   while(crawl < 14) {
   if(curl) {
-    string url = "http://35.233.25.116/sitemap/hotels/Brussels/?page=";
+    string url = "http://35.233.25.116/sitemap/hotels/Paris/?page=";
     url += to_string(crawl);
     crawl++;
     cout << "URL: "<< url << endl;
@@ -83,6 +83,13 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_USERAGENT, get_agent(crawl));
     res = curl_easy_perform(curl);
     
+    struct curl_slist *hs=NULL;
+    hs = curl_slist_append(hs, "Content-Type: text/html");
+    curl_slist_append(hs, ("Referer: " + url).c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
+    curl_easy_setopt(curl, CURLOPT_COOKIE, "controlid=L2hvdGVsL0Jlcmxpbi82MDM3NC8=");
+
+
     cout << "BUFFER" << res << endl;
 
     regex link_regex("class=\"hotellink\" href=\"(.*)\"");
@@ -94,7 +101,6 @@ int main(int argc, char *argv[])
                             curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
                             cout << http_code << endl;
     cout << "I GOT HERE" << endl;
-    sleep(5);
 	 try {
                             /* Create a connection */
                             sql::Driver *driver = get_driver_instance();
@@ -103,7 +109,7 @@ int main(int argc, char *argv[])
                             /* Connect to the MySQL test database */
                             con->setSchema(DB_SHEMA);
                             sql::PreparedStatement *stmt = con->prepareStatement(
-                                    "insert ignore into hotel (name, rooms, lat, `long`, location) values (?, ?, ?, ?, 'Brussels');");
+                                    "insert ignore into hotel (name, rooms, lat, `long`, location) values (?, ?, ?, ?, 'Paris');");
                             for (sregex_iterator i = link_begin; i != link_end; ++i) {
                                 smatch match = *i;
                                 // group 0, volledige match
@@ -119,7 +125,6 @@ int main(int argc, char *argv[])
                             cout << url << endl;
                             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
                             //curl_easy_setopt(curl, CURLOPT_USERAGENT, gen_random(12));
-                            cout << gen_random(12);
                             res = curl_easy_perform(curl);
                             cout << "RES IS: " << res << endl;
                             if (res != 0){
