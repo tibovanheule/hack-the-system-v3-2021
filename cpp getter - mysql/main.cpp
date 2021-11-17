@@ -12,7 +12,6 @@ It does require to install Boost*/
 #include <string>
 #include <curl/curl.h>
 
-#include <iostream>
 
 #define DB_PASSWORD "GmkbyY9s8swPdx4G"
 #define DB_USER "doadmin"
@@ -51,24 +50,21 @@ int main(int argc, char *argv[])
   string readBuffer;
 
   curl = curl_easy_init();
-  string url = "http://35.233.25.116/sitemap/hotels/Amsterdam/?page=";
   int crawl = 1;
 
-  while(crawl) {
+  while(crawl < 14) {
   if(curl) {
-    url += std::to_string(crawl);
+    string url = "http://35.233.25.116/sitemap/hotels/Amsterdam/?page=";
+    url += to_string(crawl);
     crawl++;
+    cout << "URL: "<< url << endl;
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
     
-    if (res == 22) {
-        crawl = 0;
-    }
 
+    cout << "BUFFER:" << readBuffer << endl;
     regex link_regex("class=\"hotellink\" href=\"(.*)\"");
     
     auto link_begin = sregex_iterator(readBuffer.begin(), readBuffer.end(), link_regex);
@@ -107,6 +103,7 @@ int main(int argc, char *argv[])
                         }
 
     }
+  readBuffer.clear();
     
   }
 
