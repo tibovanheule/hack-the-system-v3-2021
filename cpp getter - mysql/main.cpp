@@ -17,7 +17,7 @@ It does require to install Boost*/
 #define DB_PASSWORD "GmkbyY9s8swPdx4G"
 #define DB_USER "doadmin"
 #define DB_SHEMA "defaultdb"
-#define DB_URL "tcp://private-hackthesystem-do-user-2712550-0.b.db.ondigitalocean.com:25060"
+#define DB_URL "tcp://hackthesystem-do-user-2712550-0.b.db.ondigitalocean.com:25060"
 
 //Mysql lib's
 #include <mysql_connection.h>
@@ -25,6 +25,15 @@ It does require to install Boost*/
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/prepared_statement.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#else
+
+#include <unistd.h>
+
+#endif
+
 
 using namespace  std;
 
@@ -42,25 +51,29 @@ int main(int argc, char *argv[])
   string readBuffer;
 
   curl = curl_easy_init();
+  string url = "http://35.233.25.116/sitemap/hotels/Amsterdam/?page=";
+  int crawl = 1;
 
+  while(crawl) {
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "https://www.google.com");
+    url += std::to_string(crawl);
+    crawl++;
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
+    
+    if (res == 22) {
+        crawl = 0;
+    }
 
-    regex link_regex("href=\"(.*?)\"");
+    regex link_regex("class=\"hotellink\" href=\"(.*)\"");
     
     auto link_begin = sregex_iterator(readBuffer.begin(), readBuffer.end(), link_regex);
     auto link_end = sregex_iterator();
 
-    for (sregex_iterator i = link_begin; i != link_end; ++i) {
-        smatch match = *i;
-        // group 0, volledige match
-        // group 1, regex group 1
-        // ...
-        string match_str = match.str(1);
 
 	 try {
                             /* Create a connection */
@@ -70,9 +83,16 @@ int main(int argc, char *argv[])
                             /* Connect to the MySQL test database */
                             con->setSchema(DB_SHEMA);
                             sql::PreparedStatement *stmt = con->prepareStatement(
-                                    "insert into data (sent) values (?);");
+                                    "insert into data (data) values (?);");
+                            for (sregex_iterator i = link_begin; i != link_end; ++i) {
+                                smatch match = *i;
+                                // group 0, volledige match
+                                // group 1, regex group 1
+                                // ...
+                                string match_str = match.str(1);
                             stmt->setString(1,match_str  );
                             stmt->execute();
+                            }
                             stmt->close();
                             con->close();
                             delete con;
@@ -87,7 +107,9 @@ int main(int argc, char *argv[])
                         }
 
     }
-    return 0;
+    
   }
 
+
+  return 0;
 }
