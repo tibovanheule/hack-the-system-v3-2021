@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
                 "select name, location from hotel;");
         sql::ResultSet *res = select_stmt->executeQuery();
         while (res->next()) {
-            string url = "http://35.233.25.116/rates/" + res->getString("location")+ "/10502/?&destination=Amsterdam&arrivalDate=2021-12-25&departureDate=2021-12-26&numPersons=1"
+            string url = "http://35.233.25.116/rates/Amsterdam/10502/?&destination=Amsterdam&arrivalDate=2021-12-25&departureDate=2021-12-26&numPersons=1"
 
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
@@ -72,46 +72,30 @@ int main(int argc, char *argv[]) {
             curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
-
-            if (res == 22) {
-                crawl = 0;
-            }
-
-            regex link_regex("class=\"hotellink\" href=\"(.*)\"");
-
-            auto link_begin = sregex_iterator(readBuffer.begin(), readBuffer.end(), link_regex);
-            auto link_end = sregex_iterator();
-
-
             sql::PreparedStatement *stmt = con->prepareStatement(
-                    "insert into data (data) values (?);");
-            for (sregex_iterator i = link_begin; i != link_end; ++i) {
-                smatch match = *i;
-                // group 0, volledige match
-                // group 1, regex group 1
-                // ...
-                string match_str = match.str(1);
-                stmt->setString(1, match_str);
-                stmt->execute();
-            }
-            stmt->close();
-            con->close();
-            delete con;
-            driver->threadEnd();
-            delete stmt, driver;
-        } catch (sql::SQLException & e)
-        {
-            cout << "# ERR: SQLException in " << __FILE__;
-            cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-            cout << "# ERR: " << e.what();
-            cout << " (MySQL error code: " << e.getErrorCode();
-            cout << ", SQLState: " << e.getSQLState() << " )" << endl;
-        }
+                    "insert into rates (name,rate) values (?,?);");
 
+            regex regex("EUR ([0-9\.]*)");
+            std::smatch m;
+            regex_search(read, m, regex);
+            string hotelNaam = m[1];
+            stmt->setString(1, res->getString("location"));
+            stmt->setString(2, hotelNaam.c_str());
+
+            stmt->execute();
+        }
+        stmt->close();
+        con->close();
+        delete con;
+        driver->threadEnd();
+        delete stmt, driver;
+    } catch (sql::SQLException &e) {
+        cout << "# ERR: SQLException in " << __FILE__;
+        cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
+        cout << "# ERR: " << e.what();
+        cout << " (MySQL error code: " << e.getErrorCode();
+        cout << ", SQLState: " << e.getSQLState() << " )" << endl;
     }
 
-}
-
-
-return 0;
+    return 0;
 }
