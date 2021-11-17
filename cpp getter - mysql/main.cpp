@@ -17,7 +17,7 @@ It does require to install Boost*/
 #define DB_PASSWORD "GmkbyY9s8swPdx4G"
 #define DB_USER "doadmin"
 #define DB_SHEMA "defaultdb"
-#define DB_URL "tcp://hackthesystem-do-user-2712550-0.b.db.ondigitalocean.com:25060"
+#define DB_URL "tcp://private-hackthesystem-do-user-2712550-0.b.db.ondigitalocean.com:25060"
 
 //Mysql lib's
 #include <mysql_connection.h>
